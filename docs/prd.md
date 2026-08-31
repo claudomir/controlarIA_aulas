@@ -140,4 +140,4 @@ Esta plataforma permitirá que **empresas (Tenants)** se inscrevam, gerenciem se
 
 ---
 
-- Anote aqui outros pontos importantes do projeto
+- Anote aqui outros pontos importantes do projetos
