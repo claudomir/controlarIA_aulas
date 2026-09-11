@@ -3,6 +3,13 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "supabase": {
+      "url": "https://mcp.supabase.com/mcp",
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_fc559be450fe2dba6a55bc678bb8e7875b205db6",
+        "SUPABASE_PROJECT_REF": "xkmrumqbgyyglppknhpi"
+      }
     }
   }
- } 
+}
