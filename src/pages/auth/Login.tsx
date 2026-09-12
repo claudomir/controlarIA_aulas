@@ -2,18 +2,50 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const from = (location.state as any)?.from?.pathname || "/dashboard";
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement authentication logic
-    navigate("/dashboard");
+    if (!email || !password) {
+      toast.error("Preencha todos os campos.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await signIn(email, password);
+      if (error) {
+        toast.error("Falha na autenticação", {
+          description: error.message === "Invalid login credentials"
+            ? "E-mail ou senha incorretos."
+            : error.message,
+        });
+        return;
+      }
+
+      toast.success("Login realizado com sucesso!");
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      toast.error("Erro inesperado ao conectar", {
+        description: err.message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,6 +77,7 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
@@ -57,14 +90,23 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
               <Button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow-primary"
               >
-                Entrar
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
               </Button>
             </form>
             

@@ -1,4 +1,4 @@
-import { Home, MessageSquare, Settings, BarChart3, Users } from "lucide-react";
+import { Home, MessageSquare, Settings, BarChart3, Shield } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -11,17 +11,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Chat IA", url: "/dashboard/colaborador", icon: MessageSquare },
-  { title: "Configurações", url: "/dashboard/admin", icon: Settings },
-  { title: "Analytics", url: "/dashboard/master", icon: BarChart3 },
-];
+import { useAuth } from "@/contexts/AuthContext";
 
 export function AppSidebar() {
   const { state } = useSidebar();
+  const { role, isMaster, isAdmin } = useAuth();
   const isCollapsed = state === "collapsed";
+
+  const menuItems = [
+    { title: "Dashboard", url: "/dashboard", icon: Home, show: true },
+    { title: "Chat IA", url: "/dashboard/colaborador", icon: MessageSquare, show: true },
+    { title: "Configurações Tenant", url: "/dashboard/admin", icon: Settings, show: isAdmin },
+    { title: "Painel Master", url: "/dashboard/master", icon: Shield, show: isMaster },
+  ].filter((item) => item.show);
 
   return (
     <Sidebar collapsible="icon">
@@ -29,7 +31,7 @@ export function AppSidebar() {
         <div className="p-4">
           {!isCollapsed && (
             <h2 className="text-xl font-bold bg-hero-gradient bg-clip-text text-transparent">
-              ControlIA.io
+              ControlAI.io
             </h2>
           )}
           {isCollapsed && (

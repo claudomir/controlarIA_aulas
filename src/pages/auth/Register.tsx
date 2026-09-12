@@ -4,9 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,11 +18,52 @@ export default function Register() {
     password: "",
     confirmPassword: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement registration logic
-    navigate("/dashboard");
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("As senhas não coincidem", {
+        description: "Verifique os campos de senha e confirmação de senha.",
+      });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Senha muito curta", {
+        description: "A senha deve ter pelo menos 6 caracteres.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await signUp({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.name,
+        companyName: formData.company,
+      });
+
+      if (error) {
+        toast.error("Erro ao criar conta", {
+          description: error.message,
+        });
+        return;
+      }
+
+      toast.success("Conta criada com sucesso!", {
+        description: "Bem-vindo ao ControlAI. Redirecionando para seu painel...",
+      });
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error("Erro inesperado", {
+        description: err.message,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,6 +95,7 @@ export default function Register() {
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
@@ -62,6 +108,7 @@ export default function Register() {
                   value={formData.company}
                   onChange={(e) => setFormData({...formData, company: e.target.value})}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
@@ -74,6 +121,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
@@ -86,6 +134,7 @@ export default function Register() {
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
@@ -98,14 +147,23 @@ export default function Register() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                   required
+                  disabled={isSubmitting}
                   className="bg-input border-border"
                 />
               </div>
               <Button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-glow-primary"
               >
-                Criar Conta
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Criando Conta...
+                  </>
+                ) : (
+                  "Criar Conta"
+                )}
               </Button>
             </form>
             
